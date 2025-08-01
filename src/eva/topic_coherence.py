@@ -2,13 +2,10 @@ import numpy as np
 import itertools
 from sklearn.feature_extraction.text import CountVectorizer
 
-def compute_coherence(topics, vectorizer: CountVectorizer):
-    """
-    Approximate topic coherence by computing PMI over vectorizer's vocabulary.
-    """
+def compute_coherence(topics, vectorizer: CountVectorizer, raw_texts: list[str]):
     vocab = vectorizer.get_feature_names_out()
     vocab_index = {word: idx for idx, word in enumerate(vocab)}
-    X = vectorizer.transform(vectorizer._args['input_data']).toarray()  # raw corpus texts
+    X = vectorizer.transform(raw_texts).toarray()
 
     score = 0.0
     count = 0
