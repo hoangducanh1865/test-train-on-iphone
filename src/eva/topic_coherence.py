@@ -1,34 +1,25 @@
 import numpy as np
-import itertools
-from sklearn.feature_extraction.text import CountVectorizer
+from gensim.corpora import Dictionary
+from gensim.models import CoherenceModel
+from typing import List
+from src.utils.utils import split_text_word
 
-def compute_coherence(topics, vectorizer: CountVectorizer, raw_texts: list[str]):
-    vocab = vectorizer.get_feature_names_out()
-    vocab_index = {word: idx for idx, word in enumerate(vocab)}
-    X = vectorizer.transform(raw_texts).toarray()
-    N = X.shape[0]
+def compute_coherence(
+    reference_corpus: List[str],
+    vocab: List[str],
+    top_words: List[List[str]],
+    coherence_type: str = 'c_v',
+    topn: int = 20
+) -> float:
+    split_reference_corpus = split_text_word(reference_corpus)
+    dictionary = Dictionary(split_text_word(vocab))
 
-    score = 0.0
-    count = 0
-
-    for topic in topics:
-        for w1, w2 in itertools.combinations(topic, 2):
-            if w1 not in vocab_index or w2 not in vocab_index:
-                continue
-            i, j = vocab_index[w1], vocab_index[w2]
-
-            # Probabilities
-            p_i = X[:, i].sum() / N
-            p_j = X[:, j].sum() / N
-            p_ij = (X[:, i] * X[:, j]).sum() / N
-
-            if p_ij == 0:
-                continue
-
-            pmi = np.log(p_ij / (p_i * p_j))
-            npmi = pmi / (-np.log(p_ij))
-
-            score += npmi
-            count += 1
-
-    return score / count if count else 0.0
+    cm = CoherenceModel(
+        texts=split_reference_corpus,
+        dictionary=dictionary,
+        topics=top_words,
+        topn=topn,
+        coherence=coherence_type,
+    )
+    score = cm.get_coherence()
+    return score

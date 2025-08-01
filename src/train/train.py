@@ -8,13 +8,15 @@ from src.config.config import DEVICE, EPOCHS, LEARNING_RATE
 from src.eva.topic_coherence import compute_coherence
 from src.eva.topic_diversity import compute_diversity
 from src.utils.utils import plot_training_curves
+from src.utils.file_utils import split_text_word
 from IPython.display import Image, display
+import os
 
 
 def train_etm():
     loader, vectorizer = get_data_loader(return_vectorizer=True)
     raw_texts = vectorizer._args["input_data"]
-    vocab = vectorizer.get_feature_names_out()
+    vocab = vectorizer.get_feature_names_out().tolist()
 
     model = ETM().to(DEVICE)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
@@ -44,15 +46,21 @@ def train_etm():
         avg_loss = total_loss / len(loader.dataset)
         train_losses.append(avg_loss)
 
-        # Evaluate
+        # Evaluate topics
         beta = model.get_beta().cpu().detach().numpy()
         topics = [
             [vocab[i] for i in beta[k].argsort()[-10:][::-1]]
             for k in range(beta.shape[0])
         ]
 
+        # Coherence (c_v) and Diversity
+        coherence = compute_coherence(
+            reference_corpus=raw_texts,
+            vocab=vocab,
+            top_words=topics,
+            coherence_type='c_v'
+        )
         diversity = compute_diversity(topics)
-        coherence = compute_coherence(topics, vectorizer, raw_texts)
 
         coherence_scores.append(coherence)
         diversity_scores.append(diversity)
@@ -67,8 +75,9 @@ def train_etm():
             patience_counter += 1
             if patience_counter >= patience:
                 print("Early stopping triggered.")
-    
+                break
 
     print("\nFinal topics:")
     for i, topic in enumerate(topics):
         print(f"Topic {i:02d}: {' | '.join(topic)}")
+

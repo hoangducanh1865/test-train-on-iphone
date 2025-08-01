@@ -1,5 +1,9 @@
 import matplotlib.pyplot as plt
 
+
+def split_text_word(texts: list[str]) -> list[list[str]]:
+    return [text.split() for text in texts]
+
 def plot_training_curves(losses, coherence, diversity, prefix="training_plot"):
     epochs = list(range(1, len(losses) + 1))
 
