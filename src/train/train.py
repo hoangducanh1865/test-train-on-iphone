@@ -8,7 +8,7 @@ from src.config.config import DEVICE, EPOCHS, LEARNING_RATE
 from src.eva.topic_coherence import compute_coherence
 from src.eva.topic_diversity import compute_diversity
 from src.utils.utils import plot_training_curves
-from src.utils.fiutils import split_text_word
+from src.utils.utils import split_text_word
 from IPython.display import Image, display
 import os
 
