@@ -17,7 +17,12 @@ class BowDataset(Dataset):
 
 def get_data_loader(return_vectorizer=False):
     data = fetch_20newsgroups(remove=('headers', 'footers', 'quotes')).data
-    vectorizer = CountVectorizer(max_features=VOCAB_SIZE, stop_words='english')
+    vectorizer = CountVectorizer(
+        max_features=VOCAB_SIZE,
+        stop_words='english',
+        min_df=5,       
+        max_df=0.95     
+    )
     bows = vectorizer.fit_transform(data)
 
     vectorizer._args = {'input_data': data}  # HACK: đính kèm vào đối tượng vectorizer
