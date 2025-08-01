@@ -16,10 +16,11 @@ class BowDataset(Dataset):
         return self.docs[idx]
 
 def get_data_loader(return_vectorizer=False):
-    # Load real data
     data = fetch_20newsgroups(remove=('headers', 'footers', 'quotes')).data
     vectorizer = CountVectorizer(max_features=VOCAB_SIZE, stop_words='english')
     bows = vectorizer.fit_transform(data)
+
+    vectorizer._args = {'input_data': data}  # HACK: đính kèm vào đối tượng vectorizer
 
     dataset = BowDataset(bows)
     loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)

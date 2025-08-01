@@ -4,21 +4,20 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 def compute_coherence(topics, vectorizer: CountVectorizer):
     """
-    Tính coherence score sơ bộ bằng PMI giữa các từ trong topic.
-    Không cần raw text, chỉ dùng ma trận BOW và co-occurrence.
+    Approximate topic coherence by computing PMI over vectorizer's vocabulary.
     """
-    # Lấy corpus dưới dạng sparse matrix (docs x vocab)
-    X = vectorizer.transform(vectorizer.inverse_transform(np.eye(vectorizer.vocabulary_.__len__())))
-    X = X.toarray()
+    vocab = vectorizer.get_feature_names_out()
+    vocab_index = {word: idx for idx, word in enumerate(vocab)}
+    X = vectorizer.transform(vectorizer._args['input_data']).toarray()  # raw corpus texts
 
     score = 0.0
     count = 0
 
     for topic in topics:
         for w1, w2 in itertools.combinations(topic, 2):
-            if w1 not in vectorizer.vocabulary_ or w2 not in vectorizer.vocabulary_:
+            if w1 not in vocab_index or w2 not in vocab_index:
                 continue
-            i, j = vectorizer.vocabulary_[w1], vectorizer.vocabulary_[w2]
+            i, j = vocab_index[w1], vocab_index[w2]
             p_i = X[:, i].sum() + 1
             p_j = X[:, j].sum() + 1
             p_ij = (X[:, i] * X[:, j]).sum() + 1
