@@ -49,7 +49,7 @@ def train_etm():
         # Evaluate topics
         beta = model.get_beta().cpu().detach().numpy()
         topics = [
-            [vocab[i] for i in beta[k].argsort()[-10:][::-1]]
+            [vocab[i] for i in beta[k].argsort()[-10:][::-1] if vocab[i] in set(' '.join(raw_texts).split())]
             for k in range(beta.shape[0])
         ]
 
