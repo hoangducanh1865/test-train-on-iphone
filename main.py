@@ -6,8 +6,13 @@ from src.data.data_loader import get_data_loader
 from src.model.etm import ETM
 from src.config.config import DEVICE, EPOCHS, LEARNING_RATE
 
+from src.eva.topic_coherence import compute_coherence
+from src.eva.topic_diversity import compute_diversity
+
 def train():
-    loader = get_data_loader()
+    loader, vectorizer = get_data_loader(return_vectorizer=True)
+    vocab = vectorizer.get_feature_names_out()
+
     model = ETM().to(DEVICE)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     criterion = nn.KLDivLoss(reduction='batchmean')
@@ -25,11 +30,19 @@ def train():
         avg_loss = total_loss / len(loader.dataset)
         print(f"Epoch {epoch:02d} — Avg. Loss: {avg_loss:.4f}")
 
-    # In top từ
+    # In top words
     beta = model.get_beta().cpu().detach().numpy()
+    all_topics = []
     for k in range(beta.shape[0]):
-        top10 = beta[k].argsort()[-10:][::-1]
-        print(f"Topic {k:02d}: {top10.tolist()}")
+        top_indices = beta[k].argsort()[-10:][::-1]
+        words = [vocab[i] for i in top_indices]
+        print(f"Topic {k:02d}: {' | '.join(words)}")
+        all_topics.append(words)
+
+    # Evaluate
+    print("\n--- Evaluation ---")
+    print(f"Topic Diversity: {compute_diversity(all_topics):.4f}")
+    print(f"Topic Coherence (approx): {compute_coherence(all_topics, vectorizer):.4f}")
 
 if __name__ == "__main__":
     train()
