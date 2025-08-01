@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def plot_training_curves(losses, coherence, diversity):
+def plot_training_curves(losses, coherence, diversity, save_path="training_plot.png"):
     epochs = list(range(1, len(losses) + 1))
     plt.figure(figsize=(10, 6))
 
@@ -14,4 +14,6 @@ def plot_training_curves(losses, coherence, diversity):
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
+
+    plt.savefig(save_path)
     plt.show()

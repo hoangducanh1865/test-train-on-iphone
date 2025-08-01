@@ -2,13 +2,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
-
 from src.data.data_loader import get_data_loader
 from src.model.etm import ETM
 from src.config.config import DEVICE, EPOCHS, LEARNING_RATE
 from src.eva.topic_coherence import compute_coherence
 from src.eva.topic_diversity import compute_diversity
 from src.utils.utils import plot_training_curves
+from IPython.display import Image, display
+
 
 def train_etm():
     loader, vectorizer = get_data_loader(return_vectorizer=True)
@@ -69,7 +70,7 @@ def train_etm():
                 break
 
     plot_training_curves(train_losses, coherence_scores, diversity_scores)
-
+    
     print("\nFinal topics:")
     for i, topic in enumerate(topics):
         print(f"Topic {i:02d}: {' | '.join(topic)}")
