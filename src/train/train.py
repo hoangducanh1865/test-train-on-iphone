@@ -67,11 +67,21 @@ def train_etm():
             patience_counter += 1
             if patience_counter >= patience:
                 print("Early stopping triggered.")
-                break
+                
+                # Plotting
+                plot_training_curves(train_losses, coherence_scores, diversity_scores)
 
-    plot_training_curves(train_losses, coherence_scores, diversity_scores)
+                # Show plots inside Kaggle notebook
+                print("\nLoss over Epochs")
+                display(Image("training_plot_loss.png"))
+
+                print("\nTopic Coherence over Epochs")
+                display(Image("training_plot_coherence.png"))
+
+                print("\nTopic Diversity over Epochs")
+                display(Image("training_plot_diversity.png"))
     
-    display(Image("training_plot.png"))
+
     print("\nFinal topics:")
     for i, topic in enumerate(topics):
         print(f"Topic {i:02d}: {' | '.join(topic)}")

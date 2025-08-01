@@ -6,6 +6,7 @@ def compute_coherence(topics, vectorizer: CountVectorizer, raw_texts: list[str])
     vocab = vectorizer.get_feature_names_out()
     vocab_index = {word: idx for idx, word in enumerate(vocab)}
     X = vectorizer.transform(raw_texts).toarray()
+    N = X.shape[0]
 
     score = 0.0
     count = 0
@@ -15,10 +16,19 @@ def compute_coherence(topics, vectorizer: CountVectorizer, raw_texts: list[str])
             if w1 not in vocab_index or w2 not in vocab_index:
                 continue
             i, j = vocab_index[w1], vocab_index[w2]
-            p_i = X[:, i].sum() + 1
-            p_j = X[:, j].sum() + 1
-            p_ij = (X[:, i] * X[:, j]).sum() + 1
-            score += np.log(p_ij / (p_i * p_j))
+
+            # Probabilities
+            p_i = X[:, i].sum() / N
+            p_j = X[:, j].sum() / N
+            p_ij = (X[:, i] * X[:, j]).sum() / N
+
+            if p_ij == 0:
+                continue
+
+            pmi = np.log(p_ij / (p_i * p_j))
+            npmi = pmi / (-np.log(p_ij))
+
+            score += npmi
             count += 1
 
     return score / count if count else 0.0
